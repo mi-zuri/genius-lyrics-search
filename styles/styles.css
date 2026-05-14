@@ -151,15 +151,19 @@ header h1 {
     top: 4px;
     left: 4px;
     height: calc(100% - 8px);
-    width: calc(50% - 4px);
+    width: calc(33.333% - 8px / 3);
     background: var(--accent);
     border-radius: 10px;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 8px rgba(255, 255, 100, 0.3);
 }
 
-.mode-toggle[data-mode="artists"]::before {
+.mode-toggle[data-mode="albums"]::before {
     transform: translateX(100%);
+}
+
+.mode-toggle[data-mode="artists"]::before {
+    transform: translateX(200%);
 }
 
 /* Main Container */
@@ -439,6 +443,80 @@ body:not(.keyboard-nav-active):not(.mouse-hover-disabled) .artist-song-item:hove
     color: var(--text-secondary);
 }
 
+/* Album View */
+.album-image-header {
+    width: 96px;
+    height: 96px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: var(--shadow);
+}
+
+.album-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.album-header-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.album-tracks-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+}
+
+.album-track-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 6px 12px;
+    background: var(--bg-elevated);
+    border-radius: 14px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.album-view .item-title {
+    margin-bottom: 0;
+}
+
+.album-track-item.active-result {
+    background: var(--bg-elevated);
+    border-color: var(--accent);
+    transform: translateX(6px);
+}
+
+body:not(.keyboard-nav-active):not(.mouse-hover-disabled) .album-track-item:hover {
+    background: var(--bg-elevated);
+    border-color: var(--accent);
+    transform: translateX(6px);
+}
+
+.album-track-item .track-number {
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.album-track-item img {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
 /* States */
 .loading,
 .error,
@@ -477,9 +555,14 @@ body:not(.keyboard-nav-active):not(.mouse-hover-disabled) .artist-song-item:hove
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .artist-name-header {
         font-size: 1.5rem;
+    }
+
+    .album-header-text {
+        align-items: center;
+        text-align: center;
     }
     
     .artist-songs-grid {

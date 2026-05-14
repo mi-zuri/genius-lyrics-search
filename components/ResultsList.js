@@ -15,10 +15,10 @@ export class ResultsList extends SelectableList {
         // Create the container element
         const element = document.createElement('div');
         element.className = 'results-list';
-        
+
         // Initialize parent class with container and list item selector
         super(element, 'li[data-id]');
-        
+
         this.onResultClickHandler = onResultClick;
     }
 
@@ -33,12 +33,12 @@ export class ResultsList extends SelectableList {
      */
     onItemClick(item) {
         const { id, type, url } = item.dataset;
-        
+
         // For songs, open the Genius page directly
         if (type === SEARCH_MODES.SONGS && url) {
             window.open(url, '_blank', 'noopener,noreferrer');
         } else {
-            // For artists, trigger the callback to show artist details
+            // For artists/albums, trigger the callback to show detail view
             this.onResultClickHandler(id, type);
         }
     }
@@ -50,21 +50,27 @@ export class ResultsList extends SelectableList {
      */
     update(results, type) {
         this.reset(); // Clear any active selection
-        
-        // Show empty state if no results
+
+        // Show empty state if no results. Callers in app.js are responsible
+        // for not invoking update() with stale empty results (i.e. when the
+        // user has already typed past the query the result is for), so an
+        // empty results array here genuinely reflects the current query.
         if (!results?.length) {
             this.container.innerHTML = '<p class="empty-state">No results found</p>';
             return;
         }
 
+        // Map each result type to its renderer
+        const renderers = {
+            [SEARCH_MODES.SONGS]: r => this.createSongItem(r),
+            [SEARCH_MODES.ALBUMS]: r => this.createAlbumItem(r),
+            [SEARCH_MODES.ARTISTS]: r => this.createArtistItem(r),
+        };
+
         // Create list element and populate with results
         const list = document.createElement('ul');
-        results.forEach(result => {
-            list.appendChild(type === SEARCH_MODES.SONGS 
-                ? this.createSongItem(result)
-                : this.createArtistItem(result));
-        });
-        
+        results.forEach(result => list.appendChild(renderers[type](result)));
+
         // Replace container contents
         this.container.innerHTML = '';
         this.container.appendChild(list);
@@ -92,6 +98,32 @@ export class ResultsList extends SelectableList {
             </div>
         `;
         
+        return item;
+    }
+
+    /**
+     * Create a list item element for an album result
+     * @param {Object} album - Album data (from song.album field)
+     * @returns {HTMLElement} The created list item
+     */
+    createAlbumItem(album) {
+        const item = document.createElement('li');
+
+        item.dataset.id = album.id;
+        item.dataset.type = SEARCH_MODES.ALBUMS;
+
+        // Embedded album form lacks year components — use display string
+        const meta = [album.artist?.name, album.release_date_for_display]
+            .filter(Boolean).join(' • ');
+
+        item.innerHTML = `
+            <img src="${album.cover_art_url}" alt="${album.name}">
+            <div class="item-info">
+                <strong class="item-title">${album.name}</strong>
+                <p class="item-meta">${meta || 'Album'}</p>
+            </div>
+        `;
+
         return item;
     }
 
@@ -124,6 +156,13 @@ export class ResultsList extends SelectableList {
      */
     showLoading() {
         this.container.innerHTML = '<p class="loading">🔎 Searching...</p>';
+    }
+
+    /**
+     * Whether a populated result list is currently rendered (vs. loading/error/empty).
+     */
+    hasResults() {
+        return !!this.container.querySelector('ul');
     }
 
     /**

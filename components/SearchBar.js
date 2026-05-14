@@ -28,15 +28,16 @@ export class SearchBar {
     render() {
         // Create search input and mode toggle buttons
         this.element.innerHTML = `
-            <input 
-                type="text" 
-                id="search-input" 
-                placeholder="Search for songs or artists..."
+            <input
+                type="text"
+                id="search-input"
+                placeholder="Search for songs, albums or artists..."
                 autocomplete="off"
             >
             <div class="search-modes">
                 <div class="mode-toggle" data-mode="${SEARCH_MODES.SONGS}">
                     <button class="active" data-mode="${SEARCH_MODES.SONGS}">🎵 Songs</button>
+                    <button data-mode="${SEARCH_MODES.ALBUMS}">💿 Albums</button>
                     <button data-mode="${SEARCH_MODES.ARTISTS}">👤 Artists</button>
                 </div>
             </div>
@@ -89,13 +90,12 @@ export class SearchBar {
     }
 
     /**
-     * Toggle between Songs and Artists mode
+     * Cycle forward through search modes (Songs → Albums → Artists → Songs)
      */
     toggleMode() {
-        const newMode = this.currentMode === SEARCH_MODES.SONGS 
-            ? SEARCH_MODES.ARTISTS 
-            : SEARCH_MODES.SONGS;
-        this.setMode(newMode);
+        const order = Object.values(SEARCH_MODES);
+        const next = order[(order.indexOf(this.currentMode) + 1) % order.length];
+        this.setMode(next);
     }
 
     /**
@@ -104,6 +104,14 @@ export class SearchBar {
      */
     getMode() {
         return this.currentMode;
+    }
+
+    /**
+     * Get the current trimmed input value.
+     * @returns {string} Current input value with whitespace trimmed
+     */
+    getValue() {
+        return this.input.value.trim();
     }
 
     /**
